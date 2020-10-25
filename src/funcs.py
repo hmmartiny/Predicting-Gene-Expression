@@ -15,7 +15,7 @@ actname2func = {
     'relu': nn.ReLU(),
     'leaky_relu': nn.LeakyReLU(),
     'tanh': nn.Tanh()
-}
+}   
 
 class Logger(object):
     def __init__(self, logfile):
