@@ -1,4 +1,4 @@
-# Deep protein representations enable recombinantprotein expression prediction
+# Deep protein representations enable recombinant protein expression prediction
 This repository contains the code developed for the paper "Deep protein representations enable recombinant protein expression prediction".
 
 ## UniRep sequence representation
