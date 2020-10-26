@@ -137,7 +137,7 @@ if __name__ == "__main__":
     #######################################################
     # Evaluate on test set
     best_unirep_ann = load_pickle('data/seed_training/UniRep_ANN_out_units_64_p_dropout_0.1_lr_0.001.pkl')
-    test_aucs, test_mccs = [], []
+    test_aucs, test_mccs, cutoffs = [], []
     out_units = best_unirep_ann['params']['out_units']
     p_dropout = best_unirep_ann['params']['p_dropout']
     for i in range(10):
@@ -151,6 +151,7 @@ if __name__ == "__main__":
         test_aucs.append(test_auc)
         
         threshold = find_optimal_cutoff(y_score, y_test.values)
+        cutoffs.append(threshold)
         y_pred = (y_score > threshold).astype('int')
         test_mccs.append(
             matthews_corrcoef(y_test, y_pred)
@@ -165,22 +166,21 @@ if __name__ == "__main__":
         np.mean(test_mccs), 
         np.std(test_mccs))
     )
+    print(f"Cutoff: {np.mean(cutoffs):.2f}")
     
     best_aafreq_ann = load_pickle('data/seed_training/AAFreq_ANN_out_units_64_p_dropout_0.2_lr_0.01.pkl')
-    test_aucs, test_mccs = [], []
+    test_aucs, test_mccs, cutoffs = [], [], []
     out_units = best_aafreq_ann['params']['out_units']
     p_dropout = best_aafreq_ann['params']['p_dropout']
     for i in range(10):
         net = ANN(in_features=X_test.shape[1], n_out=1, out_units=[out_units], p_dropout=p_dropout)
         net.load_state_dict(best_aafreq_ann[i]['model'])
         net.eval()
-        
         y_score = net(torch.from_numpy(X_test.values).float()).detach().numpy()
         test_auc = roc_auc_score(y_test.values, y_score)
-        
         test_aucs.append(test_auc)
-        
         threshold = find_optimal_cutoff(y_score, y_test.values)
+        cutoffs.append(threshold)
         y_pred = (y_score > threshold).astype('int')
         test_mccs.append(
             matthews_corrcoef(y_test, y_pred)
@@ -188,3 +188,4 @@ if __name__ == "__main__":
     print("File:", best_aafreq_ann)
     print("Test AUC: {:.3f} (+/- {:.3f})".format(np.mean(test_aucs), np.std(test_aucs)))
     print("Test MCC: {:.3f} (+/- {:.3f})".format(np.mean(test_mccs), np.std(test_mccs)))
+    print(f"Cutoff: {np.mean(cutoffs):.2f}")
