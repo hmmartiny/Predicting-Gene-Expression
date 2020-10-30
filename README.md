@@ -1,5 +1,5 @@
-# Deep protein representations enable recombinantprotein expression prediction
-This repository contains the code developed for the paper "Deep protein representations enable recombinantprotein expression prediction".
+# Deep protein representations enable recombinant protein expression prediction
+This repository contains the code developed for the paper "Deep protein representations enable recombinant protein expression prediction".
 
 ## UniRep sequence representation
 Most of the code is originally from the [UniRep repository](https://github.com/churchlab/UniRep/), but has been modified to suit this project. The script is [`src/unirep_formatter.py`](src/unirep_formatter.py).
