@@ -3,7 +3,10 @@
 import argparse
 import pandas as pd
 from jax_unirep import get_reps
-
+from tqdm import tqdm
+import gc
+import os
+import pickle
 
 def parse_args():
     parser = argparse.ArgumentParser("Format sequences with jax-UniRep")
@@ -15,19 +18,12 @@ def parse_args():
         help="File with fasta sequences to be formatted",
         dest='fasta'
     )
-    parser.add_argument(
-        '-a', '--annotations',
-        type=str,
-        help='File with solubility annotations for sequences in the fasta file (optional)',
-        dest='solubility_annotations',
-        default=None
-    )
     
     parser.add_argument(
         '-o', '--output',
         type=str,
         required=True,
-        help='Name to store output dataframe in',
+        help='Name to store converted sequences in pickle format',
         dest='output_file'
     )
 
@@ -53,11 +49,20 @@ def read_fasta(fastafile):
 
     return res
 
-def convert(sequences):
+
+def convert(sequence):
     """Format sequences with jax-UniRep"""
-    h_avg, _, _ = get_reps(sequences)
+    h_avg, _, _ = get_reps(sequence)
     return h_avg
 
+def to_pickle(d, destfile):
+    with open(destfile, 'wb') as dest:
+        pickle.dump(d, dest)
+
+def load_pickle(sourcefile):
+    with open(sourcefile, 'rb') as source:
+        d = pickle.load(source)
+    return d
 
 if __name__ == "__main__":
     args = parse_args()
@@ -65,19 +70,21 @@ if __name__ == "__main__":
     # load sequences from FASTA file
     seqs = read_fasta(args.fasta)
 
-    # Convert dict to a dataframe and do some formatting
-    df = pd.DataFrame.from_dict(seqs, orient='index').reset_index()
-    df.rename(columns={'index': 'sid', 0: 'sequence'}, inplace=True)
-    df['sid'] = df['sid'].astype('int')
+    if os.path.isfile(args.output_file) and os.path.getsize(args.output_file) > 0:
+        unirep_seqs = load_pickle(args.output_file)
+        for sid in unirep_seqs.keys():
+            seqs.pop(sid)
+    else:
+        unirep_seqs = {}
 
-    # If annotations are given, add them to the dataframe.
-    if args.solubility_annotations is not None:
-        solubility = pd.read_csv(args.solubility_annotations)
-
-        df = df.merge(solubility, on='sid')
-
-    # run unirep formatting
-    df['unirep'] = df['sequence'].apply(convert)
-
-    # write df to csv file
-    df.to_csv(args.output_file, index=None)
+    for sid, sequence in tqdm(seqs.items()):
+        h_avg = convert(sequence)
+        unirep_seqs[sid] = h_avg
+        
+        to_pickle(
+            d = unirep_seqs, 
+            destfile=args.output_file
+        )
+        
+        del h_avg
+        gc.collect()
