@@ -6,11 +6,25 @@ import torch
 from sklearn.metrics import roc_auc_score, matthews_corrcoef, roc_curve
 from collections import defaultdict
 import sys
+import argparse
 
 sys.path.append('../')
-from train import _load, save_pickle, load_pickle
+from train import _load, save_pickle, load_pickle, _load_freq
 from model.ann import ANN
 from funcs import train_cv, Logger, find_optimal_cutoff
+
+def parse_args():
+    parser = argparse.ArgumentParser(description = "Train ANN classifiers")
+
+    parser.add_argument(
+        '-s', '--source',
+        type=str,
+        required=True,
+        help='Pickled UniRep formatted sequences',
+        dest='unirep_source'
+    )
+
+    return parser.parse_args()
 
 def train_seed(n, params, X_train, y_train, X_valid, y_valid, out_file, logger, epochs=200):
     """Seed training an ANN"""
@@ -61,6 +75,8 @@ def train_seed(n, params, X_train, y_train, X_valid, y_valid, out_file, logger, 
 
 
 if __name__ == "__main__":
+
+    args = parse_args()
     
     param_grids = {
         'out_units': [8, 16, 32, 64],
@@ -72,7 +88,7 @@ if __name__ == "__main__":
     
     #######################################################
     # UniRep ANNs
-    X_train, X_valid, y_train, y_valid = _load()
+    X_train, X_valid, y_train, y_valid = _load(args.source)
     unit_cols = np.arange(0, 1900, 1)
 
     X_train = X_train[unit_cols]
@@ -137,7 +153,7 @@ if __name__ == "__main__":
     #######################################################
     # Evaluate on test set
     best_unirep_ann = load_pickle('data/seed_training/UniRep_ANN_out_units_64_p_dropout_0.1_lr_0.001.pkl')
-    test_aucs, test_mccs, cutoffs = [], []
+    test_aucs, test_mccs, cutoffs = [], [], []
     out_units = best_unirep_ann['params']['out_units']
     p_dropout = best_unirep_ann['params']['p_dropout']
     for i in range(10):
