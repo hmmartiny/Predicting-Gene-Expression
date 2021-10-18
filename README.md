@@ -11,3 +11,4 @@ Two scripts contains the code for training classifiers to predict protein expres
 
 ## Presenting results in tables and/or figures
 The notebook [`Figures_and_tables.ipynb`](notebooks/Figures_and_tables.ipynb) show how to generate the figures and tables of the paper. Specifically Figure 2, Figure 3, Table 1 and supplementary material.
+
