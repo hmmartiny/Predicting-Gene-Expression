@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from scipy.stats import pearsonr
+from scipy.stats import spearmanr
 from statsmodels.stats.multitest import multipletests
 from nxviz.utils import infer_data_type, num_discrete_groups, cmaps, n_group_colorpallet, is_data_diverging
 from matplotlib.cm import get_cmap
@@ -30,7 +30,7 @@ def corr_pval(data, col1, col2, alpha=0.05, p_fmt=':.8f', c_fmt=':.3f'):
             nas = np.logical_or(np.isnan(x), np.isnan(y))
             
             try:
-                c, p = pearsonr(x[~nas], y[~nas])
+                c, p = spearmanr(x[~nas], y[~nas])
             except:
                 continue
             
