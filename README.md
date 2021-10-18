@@ -1,4 +1,8 @@
 # Deep protein representations enable recombinant protein expression prediction
+
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5575946.svg)](https://doi.org/10.5281/zenodo.5575946)
+
 This repository contains the code developed for the paper "Deep protein representations enable recombinant protein expression prediction".
 
 ## UniRep sequence representation
